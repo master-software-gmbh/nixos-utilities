@@ -40,6 +40,11 @@
                 default = "nixos";
               };
 
+              allowedTCPPorts = mkOption {
+                type = types.listOf types.int;
+                default = [ ];
+              };
+
               useDocker = mkOption {
                 type = types.bool;
                 default = false;
@@ -61,7 +66,7 @@
 
                 firewall = {
                   enable = true;
-                  allowedTCPPorts = [ cfg.sshPort ];
+                  allowedTCPPorts = [ cfg.sshPort ] ++ cfg.allowedTCPPorts;
                 };
               };
 
