@@ -12,7 +12,6 @@ let
   site = service: ''
     ${service.domain} {
       header -Server
-
       ${reverse_proxies service}
     }
   '';
@@ -31,6 +30,7 @@ in {
       enable = true;
       projects = {
         reverse-proxy = {
+          backup = true;
           content = {
             name = "reverse-proxy";
             services = {
@@ -40,6 +40,7 @@ in {
                 network_mode = "host";
                 volumes = [
                   "/var/lib/reverse-proxy/Caddyfile:/etc/caddy/Caddyfile"
+                  "/var/lib/reverse-proxy/data:/var/lib/caddy"
                 ];
               };
             };
@@ -49,6 +50,7 @@ in {
     };
 
     systemd.tmpfiles.rules = [
+      "d /var/lib/reverse-proxy/data 0755 root root - -"
       "L+ /var/lib/reverse-proxy/Caddyfile 0755 root root - ${caddyfile}"
     ];
   };
