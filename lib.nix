@@ -7,6 +7,30 @@ let
 
   allSystems = nixpkgs.lib.genAttrs systems;
 
+  buildBunDependencies = (pkgs: {
+    pname,
+    version,
+    src,
+    hash,
+  }: pkgs.stdenv.mkDerivation {
+    pname = "${pname}_node-modules";
+    inherit version src;
+
+    nativeBuildInputs = [ pkgs.bun ];
+    buildPhase = ''
+      bun install --production --no-progress --frozen-lockfile
+    '';
+
+    installPhase = ''
+      mkdir -p $out/node_modules
+      cp -R ./node_modules/* $out/node_modules
+    '';
+
+    outputHashAlgo = "sha256";
+    outputHashMode = "recursive";
+    outputHash = hash;
+  });
+
   buildBunPackage = (pkgs: {
     pname,
     version,
@@ -14,24 +38,7 @@ let
     hash,
   }:
     let
-      nodeModules = pkgs.stdenv.mkDerivation {
-        pname = "${pname}_node-modules";
-        inherit version src;
-
-        nativeBuildInputs = [ pkgs.bun ];
-        buildPhase = ''
-          bun install --production --no-progress --frozen-lockfile
-        '';
-
-        installPhase = ''
-          mkdir -p $out/node_modules
-          cp -R ./node_modules/* $out/node_modules
-        '';
-
-        outputHashAlgo = "sha256";
-        outputHashMode = "recursive";
-        outputHash = hash;
-      };
+      nodeModules = buildBunDependencies pkgs { inherit pname version src hash; };
     in pkgs.stdenv.mkDerivation {
       inherit pname version src;
       nativeBuildInputs = [ pkgs.bun nodeModules pkgs.makeBinaryWrapper ];
@@ -49,6 +56,7 @@ let
 
   lib = {
     inherit allSystems;
+    inherit buildBunDependencies;
     inherit buildBunPackage;
   };
 in
