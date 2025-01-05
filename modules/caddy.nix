@@ -40,7 +40,8 @@ in {
                 network_mode = "host";
                 volumes = [
                   "/var/lib/reverse-proxy/Caddyfile:/etc/caddy/Caddyfile"
-                  "/var/lib/reverse-proxy/data:/var/lib/caddy"
+                  "/var/lib/reverse-proxy/data:/data/caddy"
+                  "/var/lib/reverse-proxy/config:/config/caddy"
                 ];
               };
             };
@@ -51,6 +52,7 @@ in {
 
     systemd.tmpfiles.rules = [
       "d /var/lib/reverse-proxy/data 0755 root root - -"
+      "d /var/lib/reverse-proxy/config 0755 root root - -"
       "L+ /var/lib/reverse-proxy/Caddyfile 0755 root root - ${caddyfile}"
     ];
   };
