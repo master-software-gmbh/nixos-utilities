@@ -36,6 +36,11 @@ in {
       default = [ ];
     };
 
+    ipv6Address = mkOption {
+      type = types.str;
+      default = null;
+    };
+
     useDocker = mkOption {
       type = types.bool;
       default = false;
@@ -92,6 +97,20 @@ in {
       sshAgentAuth = {
         enable = true;
         authorizedKeysFiles = [ "/etc/ssh/authorized_keys.d/%u" ];
+      };
+    };
+
+    systemd.network = mkIf (cfg.ipv6Address != null) {
+      enable = true;
+      networks."30-wan" = {
+        matchConfig.Name = "enp1s0";
+        networkConfig.DHCP = "ipv4";
+        address = [
+          cfg.ipv6Address
+        ];
+        routes = [
+          { Gateway = "fe80::1"; }
+        ];
       };
     };
 
