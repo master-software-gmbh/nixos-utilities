@@ -9,9 +9,9 @@
       lib = import ./lib.nix { inherit nixpkgs; };
       nixosModules = {
         system = import ./modules/system.nix;
-        docker-compose = import ./modules/docker-compose.nix;
-        reverse-proxy = import ./modules/reverse-proxy.nix;
-        caddy-reverse-proxy = import ./modules/caddy.nix;
+        dockerCompose = import ./modules/docker-compose.nix;
+        reverseProxy = import ./modules/reverse-proxy.nix;
+        caddyReverseProxy = import ./modules/caddy.nix;
       };
     };
 }

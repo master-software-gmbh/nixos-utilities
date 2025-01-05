@@ -1,7 +1,12 @@
 { lib, ... }:
 {
-  options.master-software.reverse-proxy = with lib; {
+  options.masterSoftware.reverseProxy = with lib; {
     enable = mkEnableOption "Enable Reverse Proxy";
+    networkName = mkOption {
+      type = types.str;
+      default = "reverse-proxy";
+      description = "Name of the Docker network";
+    };
     services = mkOption {
       default = {};
       description = "Services to reverse proxy";

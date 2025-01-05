@@ -1,18 +1,24 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.master-software.reverse-proxy;
-  reverse_proxy = backend: ''
+  cfg = config.masterSoftware.reverseProxy;
+  dockerNetworkName = cfg.networkName;
+  globalOptions = ''
+    {
+      admin off
+    }
+  '';
+  reverseProxy = backend: ''
     reverse_proxy ${backend.matcher} {
       to ${backend.upstream}
     }
   '';
-  reverse_proxies = service: builtins.concatStringsSep "\n" (map (backend: ''
-    ${reverse_proxy backend}
+  reverseProxies = service: builtins.concatStringsSep "\n" (map (backend: ''
+    ${reverseProxy backend}
   '') service.backends);
   site = service: ''
     ${service.domain} {
       header -Server
-      ${reverse_proxies service}
+      ${reverseProxies service}
     }
   '';
   sites = builtins.concatStringsSep "\n" (map (service: ''
@@ -21,31 +27,40 @@ let
   caddyfile = pkgs.writeTextFile {
     name = "Caddyfile";
     text = ''
+      ${globalOptions}
       ${sites}
     '';
   };
 in {
+  imports = [
+    ./reverse-proxy.nix
+  ];
+
   config = {
-    services.docker-compose = {
+    masterSoftware.dockerCompose = {
       enable = true;
-      projects = {
-        reverse-proxy = {
-          backup = true;
-          content = {
-            name = "reverse-proxy";
-            services = {
-              caddy = {
-                init = true;
-                restart = "unless-stopped";
-                image = "caddy:2.8-alpine";
-                network_mode = "host";
-                volumes = [
-                  "/var/lib/reverse-proxy/Caddyfile:/etc/caddy/Caddyfile"
-                  "/var/lib/reverse-proxy/data:/data/caddy"
-                  "/var/lib/reverse-proxy/config:/config/caddy"
-                ];
-              };
-            };
+      projects.reverse-proxy = {
+        backup = true;
+        content = {
+          name = "reverse-proxy";
+          networks.reverse-proxy = {
+            name = dockerNetworkName;
+            external = false;
+          };
+          services.caddy = {
+            init = true;
+            restart = "unless-stopped";
+            image = "caddy:2.8-alpine";
+            ports = [
+              "80:80"
+              "443:443"
+            ];
+            networks = [ dockerNetworkName ];
+            volumes = [
+              "/var/lib/reverse-proxy/Caddyfile:/etc/caddy/Caddyfile"
+              "/var/lib/reverse-proxy/data:/data/caddy"
+              "/var/lib/reverse-proxy/config:/config/caddy"
+            ];
           };
         };
       };

@@ -1,11 +1,11 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.services.docker-compose;
+  cfg = config.masterSoftware.dockerCompose;
   yaml = pkgs.formats.yaml { };
   backup = import ./backup.nix { inherit pkgs; };
 in {
   options = {
-    services.docker-compose = {
+    masterSoftware.dockerCompose = {
       enable = lib.mkEnableOption "Enable Docker Compose";
       projects = lib.mkOption {
         default = {};
@@ -14,6 +14,10 @@ in {
             backup = lib.mkOption {
               type = lib.types.bool;
               default = false;
+            };
+            loadImages = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
             };
             content = lib.mkOption {
               type = yaml.type;
@@ -27,15 +31,32 @@ in {
 
   config.systemd = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: let
     dockerComposeFile = yaml.generate name project.content;
+    loadImagesServiceName = "load-images-${name}";
     projectServiceName = "docker-compose-${name}";
     restartServiceName = "restart-${name}";
     backupServiceName = "backup-${name}";
     backupTimerName = "scheduled-backup-${name}";
   in {
+    # Create a systemd service to load images for each project
+    services.${loadImagesServiceName} = lib.mkIf (project.loadImages != []) {
+      description = "Load Docker images for ${name}";
+      after = [ "docker.service" ];
+      wantedBy = [ "multi-user.target" ];
+      restartTriggers = [ dockerComposeFile ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = ''
+          ${lib.concatStringsSep " " (lib.map (imageName: "${pkgs.docker}/bin/docker image load -i ${imageName}") project.loadImages)}
+        '';
+      };
+    };
+
     # Create a systemd service to run each project
     services.${projectServiceName} = {
       description = "Run Docker Compose project for ${name}";
-      after = [ "network.target" "docker.service" ];
+      after = [ "network.target" "docker.service" "${loadImagesServiceName}.service" ];
       wantedBy = [ "multi-user.target" ];
       restartTriggers = [ dockerComposeFile ];
 
