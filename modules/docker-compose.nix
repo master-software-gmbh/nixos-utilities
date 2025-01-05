@@ -2,10 +2,7 @@
 let
   cfg = config.services.docker-compose;
   yaml = pkgs.formats.yaml { };
-  files = lib.mapAttrs (name: value: {
-    content = yaml.generate name value.content;
-    backup = value.backup;
-  }) cfg.projects;
+  backup = import ./backup.nix { inherit pkgs; };
 in {
   options = {
     services.docker-compose = {
@@ -28,69 +25,68 @@ in {
     };
   };
 
-  config = let
-    getProjectServiceName = name: "docker-compose-${name}";
-    getRestartServiceName = name: "restart-${name}";
-    getBackupServiceName = name: "backup-${name}";
-    getBackupTimerName = name: "scheduled-backup-${name}";
-    backup = import ./backup.nix { inherit pkgs; };
+  config.systemd = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: let
+    dockerComposeFile = yaml.generate name project.content;
+    projectServiceName = "docker-compose-${name}";
+    restartServiceName = "restart-${name}";
+    backupServiceName = "backup-${name}";
+    backupTimerName = "scheduled-backup-${name}";
   in {
     # Create a systemd service to run each project
-    systemd.services = lib.mkMerge [
-      (lib.mapAttrs' (name: value: lib.nameValuePair (getProjectServiceName name) {
-        description = "Run Docker Compose project for ${name}";
-        after = [ "network.target" "docker.service" ];
-        wantedBy = [ "multi-user.target" ];
+    services.${projectServiceName} = {
+      description = "Run Docker Compose project for ${name}";
+      after = [ "network.target" "docker.service" ];
+      wantedBy = [ "multi-user.target" ];
+      restartTriggers = [ dockerComposeFile ];
 
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f ${value.content} up -d";
-          ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f ${value.content} down";
-          ExecStopPost = lib.mkIf value.backup (
-            # has a default timeout of 90 seconds
-            "${pkgs.systemd}/bin/systemctl start ${getBackupServiceName name}.service"
-          );
-        };
-      }) files)
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f ${dockerComposeFile} up -d";
+        ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f ${dockerComposeFile} down";
+        ExecStopPost = lib.mkIf project.backup (
+          # has a default timeout of 90 seconds
+          "${pkgs.systemd}/bin/systemctl start ${backupServiceName}.service"
+        );
+      };
+    };
 
-      # Create a systemd service to restart each project
-      (lib.mapAttrs' (name: value: lib.nameValuePair (getRestartServiceName name) {
-        description = "Restart systemd service for ${name}";
+    # Create a systemd service to restart each project
+    services.${restartServiceName} = lib.mkIf project.backup {
+      description = "Restart systemd service for ${name}";
 
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = "${pkgs.systemd}/bin/systemctl restart ${getProjectServiceName name}.service";
-        };
-      }) (lib.filterAttrs (name: value: value.backup) files))
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${pkgs.systemd}/bin/systemctl restart ${projectServiceName}.service";
+      };
+    };
 
-      # Create a systemd service to backup each project
-      (lib.mapAttrs' (name: value: lib.nameValuePair (getBackupServiceName name) {
-        description = "Execute backup for ${name}";
-        path = [ pkgs.gnutar pkgs.gzip ];
+    # Create a systemd service to backup each project
+    services.${backupServiceName} = lib.mkIf project.backup {
+      description = "Execute backup for ${name}";
+      path = [ pkgs.gnutar pkgs.gzip pkgs.s3cmd ];
 
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${backup.script} /var/lib/${name}";
-        };
-      }) (lib.filterAttrs (name: value: value.backup) files))
-    ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${backup.script} /var/lib/${name}";
+      };
+    };
 
     # Create a systemd timer to run scheduled backups for each project
-    systemd.timers = lib.mapAttrs' (name: value: lib.nameValuePair (getBackupTimerName name) {
+    timers.${backupTimerName} = lib.mkIf project.backup {
       description = "Run scheduled backup for ${name}";
       wantedBy = [ "multi-user.target" ];
 
       timerConfig = {
-        Unit = "${getRestartServiceName name}.service";
+        Unit = "${restartServiceName}.service";
         OnCalendar = "2:00";
         Persistent = true;
       };
-    }) (lib.filterAttrs (name: value: value.backup) files);
+    };
 
-    systemd.tmpfiles.rules = lib.mkIf cfg.enable (lib.concatLists (lib.mapAttrsToList (name: value: [
+    tmpfiles.rules = [
       "d /var/lib/${name} 0755 root root - -"
-      "L+ /var/lib/${name}/docker-compose.yaml 0755 root root - ${value.content}"
-    ]) files));
-  };
+      "L+ /var/lib/${name}/docker-compose.yaml 0755 root root - ${dockerComposeFile}"
+    ];
+  }) cfg.projects));
 }

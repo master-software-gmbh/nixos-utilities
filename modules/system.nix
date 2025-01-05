@@ -37,7 +37,7 @@ in {
     };
 
     ipv6Address = mkOption {
-      type = types.str;
+      type = lib.types.nullOr lib.types.str;
       default = null;
     };
 

@@ -36,6 +36,7 @@ in {
             services = {
               caddy = {
                 init = true;
+                restart = "unless-stopped";
                 image = "caddy:2.8-alpine";
                 network_mode = "host";
                 volumes = [
