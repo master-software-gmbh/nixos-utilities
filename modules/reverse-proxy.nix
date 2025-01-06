@@ -4,8 +4,8 @@
   options.masterSoftware.reverseProxy = with lib; {
     enable = mkEnableOption "Enable Reverse Proxy";
     networkName = mkOption {
-      description = "Name of the Docker network";
-      type = types.str;
+      description = "Name of the Docker network. If the value is null, the host network will be used.";
+      type = lib.types.nullOr types.str;
       default = "reverse-proxy";
     };
     services = mkOption {

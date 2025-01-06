@@ -57,7 +57,7 @@ in {
 
       firewall = {
         enable = true;
-        allowedTCPPorts = [ cfg.sshPort ] ++ cfg.allowedTCPPorts;
+        allowedTCPPorts = cfg.allowedTCPPorts;
       };
     };
 
@@ -73,7 +73,7 @@ in {
     services.openssh = {
       enable = true;
       ports = [ cfg.sshPort ];
-      openFirewall = false;
+      openFirewall = true;
       settings = {
         X11Forwarding = false;
         PermitRootLogin = "no";

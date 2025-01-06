@@ -44,7 +44,7 @@ in {
         backup = true;
         content = {
           name = "reverse-proxy";
-          networks.reverse-proxy = {
+          networks.reverse-proxy = lib.mkIf (dockerNetworkName != null) {
             name = dockerNetworkName;
             external = true;
           };
@@ -56,7 +56,8 @@ in {
               "80:80"
               "443:443"
             ];
-            networks = [ dockerNetworkName ];
+            network_mode = lib.mkIf (dockerNetworkName == null) "host";
+            networks = lib.mkIf (dockerNetworkName != null) [ dockerNetworkName ];
             volumes = [
               "/var/lib/reverse-proxy/Caddyfile:/etc/caddy/Caddyfile"
               "/var/lib/reverse-proxy/data:/data/caddy"
