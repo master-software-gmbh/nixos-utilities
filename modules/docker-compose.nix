@@ -1,7 +1,9 @@
 { config, lib, pkgs, ... }:
+
 let
   cfg = config.masterSoftware.dockerCompose;
   yaml = pkgs.formats.yaml { };
+  systemdServiceRef = (import ../lib.nix { inherit pkgs; }).systemdServiceRef;
   backup = import ./backup.nix { inherit pkgs; };
 in {
   options = {
@@ -12,14 +14,17 @@ in {
         type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
           options = {
             backup = lib.mkOption {
+              description = "Enable automatic backups for the project directory";
               type = lib.types.bool;
               default = false;
             };
             loadImages = lib.mkOption {
+              description = "List of Docker images to load before starting the project";
               type = lib.types.listOf lib.types.str;
               default = [];
             };
             content = lib.mkOption {
+              description = "Docker Compose project configuration";
               type = yaml.type;
               default = {};
             };
@@ -31,14 +36,14 @@ in {
 
   config.systemd = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: let
     dockerComposeFile = yaml.generate name project.content;
-    loadImagesServiceName = "load-images-${name}";
-    projectServiceName = "docker-compose-${name}";
-    restartServiceName = "restart-${name}";
-    backupServiceName = "backup-${name}";
-    backupTimerName = "scheduled-backup-${name}";
+    loadImagesService = "load-images-${name}";
+    projectService = "docker-compose-${name}";
+    restartService = "restart-${name}";
+    backupService = "backup-${name}";
+    backupTimer = "scheduled-backup-${name}";
   in {
     # Create a systemd service to load images for each project
-    services.${loadImagesServiceName} = lib.mkIf (project.loadImages != []) {
+    services.${loadImagesService} = lib.mkIf (project.loadImages != []) {
       description = "Load Docker images for ${name}";
       after = [ "docker.service" ];
       wantedBy = [ "multi-user.target" ];
@@ -54,9 +59,9 @@ in {
     };
 
     # Create a systemd service to run each project
-    services.${projectServiceName} = {
+    services.${projectService} = {
       description = "Run Docker Compose project for ${name}";
-      after = [ "network.target" "docker.service" "${loadImagesServiceName}.service" ];
+      after = [ "network.target" "docker.service" (systemdServiceRef loadImagesService) ];
       wantedBy = [ "multi-user.target" ];
       restartTriggers = [ dockerComposeFile ];
 
@@ -67,23 +72,23 @@ in {
         ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f ${dockerComposeFile} down";
         ExecStopPost = lib.mkIf project.backup (
           # has a default timeout of 90 seconds
-          "${pkgs.systemd}/bin/systemctl start ${backupServiceName}.service"
+          "${pkgs.systemd}/bin/systemctl start ${systemdServiceRef backupService}"
         );
       };
     };
 
     # Create a systemd service to restart each project
-    services.${restartServiceName} = lib.mkIf project.backup {
+    services.${restartService} = lib.mkIf project.backup {
       description = "Restart systemd service for ${name}";
 
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.systemd}/bin/systemctl restart ${projectServiceName}.service";
+        ExecStart = "${pkgs.systemd}/bin/systemctl restart ${systemdServiceRef projectService}";
       };
     };
 
     # Create a systemd service to backup each project
-    services.${backupServiceName} = lib.mkIf project.backup {
+    services.${backupService} = lib.mkIf project.backup {
       description = "Execute backup for ${name}";
       path = [ pkgs.gnutar pkgs.gzip pkgs.s3cmd ];
 
@@ -94,12 +99,12 @@ in {
     };
 
     # Create a systemd timer to run scheduled backups for each project
-    timers.${backupTimerName} = lib.mkIf project.backup {
+    timers.${backupTimer} = lib.mkIf project.backup {
       description = "Run scheduled backup for ${name}";
       wantedBy = [ "multi-user.target" ];
 
       timerConfig = {
-        Unit = "${restartServiceName}.service";
+        Unit = systemdServiceRef restartService;
         OnCalendar = "2:00";
         Persistent = true;
       };

@@ -1,11 +1,11 @@
-{ nixpkgs }:
+{ pkgs, ... }:
 let
   systems = [
     "aarch64-darwin"
     "x86_64-linux"
   ];
 
-  allSystems = nixpkgs.lib.genAttrs systems;
+  allSystems = pkgs.lib.genAttrs systems;
 
   buildBunDependencies = (pkgs: {
     pname,
@@ -54,10 +54,13 @@ let
       '';
   });
 
+  systemdServiceRef = name: "${name}.service";
+
   lib = {
     inherit allSystems;
     inherit buildBunDependencies;
     inherit buildBunPackage;
+    inherit systemdServiceRef;
   };
 in
   lib

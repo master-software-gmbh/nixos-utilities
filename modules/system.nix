@@ -1,6 +1,6 @@
 { lib, pkgs, config, modulesPath, ... }:
-with lib;
-let
+
+with lib; let
   cfg = config.modules.system;
 in {
   options.modules.system = {

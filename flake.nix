@@ -6,7 +6,7 @@
   outputs = { self, nixpkgs }:
     let
     in {
-      lib = import ./lib.nix { inherit nixpkgs; };
+      lib = import ./lib.nix { pkgs = nixpkgs; };
       nixosModules = {
         system = import ./modules/system.nix;
         dockerCompose = import ./modules/docker-compose.nix;
