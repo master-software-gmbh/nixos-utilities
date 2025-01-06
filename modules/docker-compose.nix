@@ -3,8 +3,8 @@
 let
   cfg = config.masterSoftware.dockerCompose;
   yaml = pkgs.formats.yaml { };
-  systemdServiceRef = (import ../lib.nix { inherit pkgs; }).systemdServiceRef;
   backup = import ./backup.nix { inherit pkgs; };
+  systemdServiceRef = (import ../lib.nix { inherit pkgs; }).systemdServiceRef;
 in {
   options = {
     masterSoftware.dockerCompose = {
@@ -61,7 +61,7 @@ in {
     # Create a systemd service to run each project
     services.${projectService} = {
       description = "Run Docker Compose project for ${name}";
-      after = [ "network.target" "docker.service" (systemdServiceRef loadImagesService) ];
+      after = [ "network.target" "docker.service" (systemdServiceRef loadImagesService) (systemdServiceRef config.masterSoftware.docker.setupService) ];
       wantedBy = [ "multi-user.target" ];
       restartTriggers = [ dockerComposeFile ];
 

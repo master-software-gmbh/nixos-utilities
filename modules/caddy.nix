@@ -46,7 +46,7 @@ in {
           name = "reverse-proxy";
           networks.reverse-proxy = {
             name = dockerNetworkName;
-            external = false;
+            external = true;
           };
           services.caddy = {
             init = true;

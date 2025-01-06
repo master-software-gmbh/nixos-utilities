@@ -40,11 +40,6 @@ in {
       type = lib.types.nullOr lib.types.str;
       default = null;
     };
-
-    useDocker = mkOption {
-      type = types.bool;
-      default = false;
-    };
   };
 
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
@@ -69,16 +64,10 @@ in {
     users.users = {
       "${cfg.userName}" = {
         isNormalUser = true;
-        extraGroups = [ "wheel" ] ++ (if cfg.useDocker then [ "docker" ] else [ ]);
+        extraGroups = [ "wheel" ];
         packages = with pkgs; [ ];
         openssh.authorizedKeys.keys = cfg.sshAuthorizedKeys;
       };
-    };
-
-    virtualisation.docker = mkIf cfg.useDocker {
-      enable = true;
-      enableOnBoot = true;
-      autoPrune.enable = true;
     };
 
     services.openssh = {
