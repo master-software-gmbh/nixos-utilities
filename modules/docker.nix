@@ -21,7 +21,7 @@ in {
       networks = lib.mkOption {
         description = "Docker networks";
         type = lib.types.listOf lib.types.str;
-        default = {};
+        default = [];
       };
       setupService = lib.mkOption {
         description = "Systemd service to setup Docker";
