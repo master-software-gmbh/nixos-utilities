@@ -1,18 +1,15 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
+  cfg = config.masterSoftware.backups;
   backupLocation = "/var/lib/backups";
-  backupScript = pkgs.writeShellScript "backup" ''
+  backupScript = backupPath: (pkgs.writeShellScript "backup" ''
     #!/bin/bash
 
-    if [ $# -ne 1 ]; then
-      echo "Usage: $0 <folder-path>"
-      exit 1
-    fi
+    folder_path=${backupPath}
 
     echo "Creating backup from $1."
 
-    folder_path=$1
     timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
     backup_file="${backupLocation}/$(basename ''\${folder_path})_''\${timestamp}.tar.gz"
 
@@ -28,14 +25,60 @@ let
       exit 1
     fi
 
-    echo "Backup created at $backup_file"
-  '';
+    echo "Backup created at $backup_file."
+  '');
 in {
-  script = backupScript;
+  options = {
+    masterSoftware.backups = with lib; {
+      enable = mkEnableOption "Enable backups";
+      locations = mkOption {
+        default = {};
+        type = types.attrsOf (types.submodule ({ name, ... }: {
+          options = {
+            serviceName = mkOption {
+              description = "Name of the systemd backup service";
+              type = types.str;
+              default = "backup${name}";
+            };
+            preCommand = mkOption {
+              description = "Command to run before the backup";
+              type = types.nullOr types.str;
+              default = null;
+            };
+            postCommand = mkOption {
+              description = "Command to run after the backup";
+              type = types.nullOr types.str;
+              default = null;
+            };
+          };
+        }));
+      };
+    };
+  };
 
   config = {
-    systemd.tmpfiles.rules = [
-      "d ${backupLocation} 0755 root root - -"
+    systemd = lib.mkMerge [
+      {
+        tmpfiles.rules = [
+          "d ${backupLocation} 0755 root root - -"
+        ];
+      }
+
+      (lib.mkMerge (lib.mapAttrsToList (path: options: let
+        script = backupScript path;
+      in {
+        services."${options.serviceName}" = {
+          description = "Execute backup of ${path}";
+          path = [ pkgs.gnutar pkgs.gzip pkgs.s3cmd ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStartPre = lib.mkIf (options.preCommand != null) options.preCommand;
+            ExecStart = script;
+            ExecStartPost = lib.mkIf (options.postCommand != null) options.postCommand;
+          };
+        };
+      }) cfg.locations))
     ];
   };
 }

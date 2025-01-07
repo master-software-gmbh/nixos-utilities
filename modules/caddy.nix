@@ -52,7 +52,7 @@ in {
             init = true;
             restart = "unless-stopped";
             image = "caddy:2.8-alpine";
-            ports = [
+            ports = lib.mkIf (dockerNetworkName != null) [
               "80:80"
               "443:443"
             ];
