@@ -11,7 +11,7 @@
       dockerCompose = import ./modules/docker-compose.nix;
       reverseProxy = import ./modules/reverse-proxy.nix;
       caddyReverseProxy = import ./modules/caddy.nix;
-      backups = import ./modules/backup.nix;
+      backups = import ./modules/backups.nix;
       systemdTimers = import ./modules/systemd-timers.nix;
     };
   };
