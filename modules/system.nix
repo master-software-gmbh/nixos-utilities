@@ -83,7 +83,23 @@ in {
         };
       };
 
-      fail2ban.enable = true;
+      fail2ban = {
+        enable = true;
+        # Temporary patch due to unreleased fix for fail2ban
+        # See: https://github.com/fail2ban/fail2ban/commit/2fed408c05ac5206b490368d94599869bd6a056d and https://github.com/fail2ban/fail2ban/commit/50ff131a0fd8f54fdeb14b48353f842ee8ae8c1a
+        package = pkgs.fail2ban.overrideAttrs(old: {
+          patches = [
+            (pkgs.fetchpatch {
+              url = "https://github.com/fail2ban/fail2ban/commit/2fed408c05ac5206b490368d94599869bd6a056d.patch";
+              hash = "sha256-uyrCdcBm0QyA97IpHzuGfiQbSSvhGH6YaQluG5jVIiI=";
+            })
+            (pkgs.fetchpatch {
+              url = "https://github.com/fail2ban/fail2ban/commit/50ff131a0fd8f54fdeb14b48353f842ee8ae8c1a.patch";
+              hash = "sha256-YGsUPfQRRDVqhBl7LogEfY0JqpLNkwPjihWIjfGdtnQ=";
+            })
+          ];
+        });
+      };
     };
 
     security.pam = {
