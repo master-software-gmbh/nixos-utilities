@@ -70,16 +70,20 @@ in {
       };
     };
 
-    services.openssh = {
-      enable = true;
-      ports = [ cfg.sshPort ];
-      openFirewall = true;
-      settings = {
-        X11Forwarding = false;
-        PermitRootLogin = "no";
-        PasswordAuthentication = false;
-        KbdInteractiveAuthentication = false;
+    services = {
+      openssh = {
+        enable = true;
+        ports = [ cfg.sshPort ];
+        openFirewall = true;
+        settings = {
+          X11Forwarding = false;
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
+          KbdInteractiveAuthentication = false;
+        };
       };
+
+      fail2ban.enable = true;
     };
 
     security.pam = {
