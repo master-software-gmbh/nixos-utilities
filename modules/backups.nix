@@ -3,6 +3,14 @@
 let
   cfg = config.masterSoftware.backups;
   backupLocation = "/var/lib/backups";
+  optionalS3Backup = if (cfg.s3Config.configFile != null) then ''
+    ${pkgs.s3cmd}/bin/s3cmd --config=${cfg.s3Config.configFile} put $backup_file s3://${cfg.s3Config.bucket}
+
+    if [ $? -ne 0 ]; then
+      echo "Failed to create S3 backup."
+      exit 1
+    fi
+  '' else "";
   backupScript = backupPath: (pkgs.writeShellScript "backup" ''
     #!/bin/bash
 
@@ -25,12 +33,30 @@ let
       exit 1
     fi
 
+    ${optionalS3Backup}
+
     echo "Backup created at $backup_file."
   '');
 in {
   options = {
     masterSoftware.backups = with lib; {
       enable = mkEnableOption "Enable backups";
+      s3Config = mkOption {
+        description = "Configuration object for optional S3 backup";
+        default = null;
+        type = types.nullOr (types.submodule {
+          options = {
+            bucket = mkOption {
+              description = "S3 bucket";
+              type = types.str;
+            };
+            configFile = mkOption {
+              description = "Path to the s3cmd configuration file";
+              type = types.str;
+            };
+          };
+        });
+      };
       locations = mkOption {
         default = {};
         type = types.attrsOf (types.submodule ({ name, ... }: {
@@ -57,6 +83,8 @@ in {
   };
 
   config = {
+    environment.systemPackages = [ pkgs.gnutar pkgs.gzip pkgs.s3cmd ];
+
     systemd = lib.mkMerge [
       {
         tmpfiles.rules = [

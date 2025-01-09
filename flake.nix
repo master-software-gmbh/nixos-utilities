@@ -6,13 +6,14 @@
   outputs = { self, nixpkgs }: {
     lib = import ./lib.nix { pkgs = nixpkgs; };
     nixosModules = {
-      system = import ./modules/system.nix;
+      backups = import ./modules/backups.nix;
+      caddyReverseProxy = import ./modules/caddy.nix;
       docker = import ./modules/docker.nix;
       dockerCompose = import ./modules/docker-compose.nix;
       reverseProxy = import ./modules/reverse-proxy.nix;
-      caddyReverseProxy = import ./modules/caddy.nix;
-      backups = import ./modules/backups.nix;
+      system = import ./modules/system.nix;
       systemdTimers = import ./modules/systemd-timers.nix;
+      vaultAgent = import ./modules/vault-agent.nix;
     };
   };
 }
