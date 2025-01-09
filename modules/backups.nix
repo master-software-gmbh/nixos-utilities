@@ -26,7 +26,7 @@ let
       exit 1
     fi
 
-    tar -czf "$backup_file" -C "$(dirname "$folder_path")" "$(basename "$folder_path")"
+    tar -czf "$backup_file" -C "$(dirname "$folder_path")" --dereference "$(basename "$folder_path")"
 
     if [ $? -ne 0 ]; then
       echo "Failed to create local backup."
