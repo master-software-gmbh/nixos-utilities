@@ -5,7 +5,15 @@ let
     "x86_64-linux"
   ];
 
-  allSystems = pkgs.lib.genAttrs systems;
+  allSystems = f: builtins.foldl' ((f: attrs: system: let
+    ret = f system;
+  in
+    builtins.foldl' (attrs: key: attrs // {
+      ${key} = (attrs.${key} or { }) // {
+        ${system} = ret.${key};
+      };
+    }) attrs (builtins.attrNames ret)
+  ) f) { } systems;
 
   buildBunDependencies = (pkgs: {
     pname,
