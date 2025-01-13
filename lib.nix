@@ -55,10 +55,7 @@ let
         mkdir -p $out/
         ln -s ${nodeModules}/node_modules $out/
         cp -R ./src package.jso[n] tsconfig.jso[n] $out
-
-        makeBinaryWrapper ${pkgs.bun}/bin/bun $out/bin \
-          --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.bun ]} \
-          --add-flags "run --prefer-offline --no-install $out/src/main.ts"
+        makeBinaryWrapper ${pkgs.bun}/bin/bun $out/bun --chdir $out
       '';
   });
 
