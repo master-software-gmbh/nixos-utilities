@@ -66,7 +66,13 @@ in {
       # Create a systemd service to run each project
       services.${projectService} = {
         description = "Run Docker Compose project for ${name}";
-        after = [ "network.target" "docker.service" (systemdServiceRef loadImagesService) (systemdServiceRef config.masterSoftware.docker.setupService) ];
+        after = [
+          "network.target"
+          "docker.service"
+          (systemdServiceRef loadImagesService)
+          (systemdServiceRef config.masterSoftware.vaultAgent.serviceName)
+          (systemdServiceRef config.masterSoftware.docker.setupService)
+        ];
         wantedBy = [ "multi-user.target" ];
         restartTriggers = [ dockerComposeFile ];
 
@@ -98,26 +104,20 @@ in {
       ];
     }) cfg.projects));
 
-    masterSoftware.backups = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: let
-      projectPath = "/var/lib/${name}";
-      restartService = "restart-${name}";
-    in {
+    masterSoftware.backups = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: {
       # Setup a backup service
       enable = true;
-      locations."${projectPath}" = {
+      locations."/var/lib/${name}" = {
         serviceName = "backup-${name}";
       };
     }) (lib.filterAttrs (name: project: project.backup) cfg.projects)));
 
-    masterSoftware.systemdTimers = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: let
-      projectPath = "/var/lib/${name}";
-      restartService = "restart-${name}";
-    in {
+    masterSoftware.systemdTimers = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: {
       # Setup a systemd timer
       enable = true;
       timers."scheduled-backup-${name}" = {
-        description = "Run scheduled backup of ${projectPath}";
-        serviceName = restartService;
+        description = "Run scheduled backup of /var/lib/${name}";
+        serviceName = "restart-${name}";
       };
     }) (lib.filterAttrs (name: project: project.backup) cfg.projects)));
   };

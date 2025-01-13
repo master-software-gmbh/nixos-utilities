@@ -4,9 +4,13 @@ let
   json = pkgs.formats.json { };
 in {
   options = {
-    masterSoftware.vaultAgent = {
-      enable = lib.mkEnableOption "Enable vault-agent";
-      agentConfig = lib.mkOption {
+    masterSoftware.vaultAgent = with lib; {
+      enable = mkEnableOption "Enable vault-agent";
+      serviceName = mkOption {
+        type = types.str;
+        default = "vault-agent";
+      };
+      agentConfig = mkOption {
         type = json.type;
       };
     };
@@ -21,16 +25,14 @@ in {
       systemPackages = [ pkgs.vault ];
     };
 
-    systemd.services = {
-      vault-agent = {
-        description = "HashiCorp Vault Agent";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "network.target" ];
-        path = [ pkgs.getent ];
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = "${pkgs.vault}/bin/vault agent -config=${configFile}";
-        };
+    systemd.services."${cfg.serviceName}" = {
+      description = "HashiCorp Vault Agent";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      path = [ pkgs.getent ];
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${pkgs.vault}/bin/vault agent -config=${configFile}";
       };
     };
   };
