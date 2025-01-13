@@ -123,6 +123,19 @@ in {
       };
     };
 
+    nix = {
+      optimise = {
+        automatic = true;
+        dates = [ "03:00" ];
+      };
+
+      gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 14d";
+      };
+    };
+
     # Hardware configuration
 
     boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
