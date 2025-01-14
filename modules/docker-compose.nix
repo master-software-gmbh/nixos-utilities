@@ -42,44 +42,32 @@ in {
     systemd = lib.mkIf cfg.enable (lib.mkMerge (lib.mapAttrsToList (name: project: let
       dockerComposeFile = yaml.generate name project.content;
       projectPath = "/var/lib/${name}";
-      loadImagesService = "load-images-${name}";
       projectService = "docker-compose-${name}";
       restartService = "restart-${name}";
       backupService = config.masterSoftware.backups.locations."${projectPath}".serviceName;
     in {
-      # Create a systemd service to load images for each project
-      services.${loadImagesService} = lib.mkIf (project.loadImages != []) {
-        description = "Load Docker images for ${name}";
-        after = [ "docker.service" ];
-        wantedBy = [ "multi-user.target" ];
-        restartTriggers = [ dockerComposeFile ];
-
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = ''
-            ${lib.concatStringsSep " " (lib.map (imageName: "${pkgs.docker}/bin/docker image load -i ${imageName}") project.loadImages)}
-          '';
-        };
-      };
-
       # Create a systemd service to run each project
       services.${projectService} = {
         description = "Run Docker Compose project for ${name}";
         after = [
           "network.target"
           "docker.service"
-          (systemdServiceRef loadImagesService)
           (systemdServiceRef config.masterSoftware.vaultAgent.serviceName)
           (systemdServiceRef config.masterSoftware.docker.setupService)
         ];
         wantedBy = [ "multi-user.target" ];
         restartTriggers = [ dockerComposeFile ];
 
-        serviceConfig = {
+        serviceConfig = let
+          startScript = pkgs.writeShellScript "backup" ''
+            #!/bin/bash
+            ${lib.concatStringsSep " " (lib.map (imageName: "${pkgs.docker}/bin/docker image load -i ${imageName}") project.loadImages)}
+            ${pkgs.docker-compose}/bin/docker-compose -f ${dockerComposeFile} up -d
+          '';
+        in {
           Type = "oneshot";
           RemainAfterExit = true;
-          ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f ${dockerComposeFile} up -d";
+          ExecStart = startScript;
           ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f ${dockerComposeFile} down";
           ExecStopPost = lib.mkIf project.backup (
             # has a default timeout of 90 seconds
