@@ -83,7 +83,7 @@ in {
   };
 
   config = {
-    environment.systemPackages = [ pkgs.gnutar pkgs.gzip pkgs.s3cmd ];
+    environment.systemPackages = [ pkgs.gnupg pkgs.gnutar pkgs.gzip pkgs.s3cmd ];
 
     systemd = lib.mkMerge [
       {
