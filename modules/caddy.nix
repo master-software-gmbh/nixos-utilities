@@ -37,7 +37,7 @@ in {
     ./reverse-proxy.nix
   ];
 
-  config = {
+  config = lib.mkIf cfg.enable {
     masterSoftware.dockerCompose = {
       enable = true;
       projects.reverse-proxy = {
