@@ -79,11 +79,8 @@ let
     '';
   });
 
-  buildStaticWebserver = (pkgs: manifest: src: pkgs.stdenv.mkDerivation {
-    inherit src;
-
-    name = manifest.name;
-    version = manifest.version;
+  buildStaticWebserver = (pkgs: pname: version: src: pkgs.stdenv.mkDerivation {
+    inherit pname version src;
     buildInputs = [ pkgs.caddy pkgs.makeWrapper ];
 
     installPhase = ''
@@ -106,9 +103,9 @@ let
     ];
   });
 
-  mkStaticWebserverFlake = (pkgs: manifest: src: {
+  mkStaticWebserverFlake = (pkgs: pname: version: src: {
     devShells.default = mkStaticWebserverShell pkgs src;
-    packages.default = buildStaticWebserver pkgs manifest src;
+    packages.default = buildStaticWebserver pkgs pname version src;
   });
 
   systemdServiceRef = name: "${name}.service";
