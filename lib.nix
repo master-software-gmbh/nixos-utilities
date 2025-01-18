@@ -79,6 +79,38 @@ let
     '';
   });
 
+  buildStaticWebserver = (pkgs: manifest: src: pkgs.stdenv.mkDerivation {
+    inherit src;
+
+    name = manifest.name;
+    version = manifest.version;
+    buildInputs = [ pkgs.caddy pkgs.makeWrapper ];
+
+    installPhase = ''
+      ROOT=$out/html
+      mkdir -p $ROOT
+      cp -r . $ROOT
+
+      makeWrapper ${pkgs.caddy}/bin/caddy $out/caddy --add-flags "file-server --root $ROOT"
+    '';
+  });
+
+  mkStaticWebserverShell = (pkgs: src: let
+    serve = pkgs.writeShellScriptBin "serve" ''
+      ${pkgs.caddy}/bin/caddy file-server --root ${src}
+    '';
+  in pkgs.mkShell {
+    buildInputs = [
+      pkgs.caddy
+      serve
+    ];
+  });
+
+  mkStaticWebserverFlake = (pkgs: manifest: src: {
+    devShells.default = mkStaticWebserverShell pkgs src;
+    packages.default = buildStaticWebserver pkgs manifest src;
+  });
+
   systemdServiceRef = name: "${name}.service";
 
   lib = {
@@ -86,6 +118,9 @@ let
     inherit buildBunDependencies;
     inherit buildBunPackage;
     inherit buildSqliteExtensions;
+    inherit buildStaticWebserver;
+    inherit mkStaticWebserverShell;
+    inherit mkStaticWebserverFlake;
     inherit systemdServiceRef;
   };
 in
