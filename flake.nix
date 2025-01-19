@@ -4,7 +4,7 @@
   };
 
   outputs = { self, nixpkgs }: {
-    lib = import ./lib.nix { pkgs = nixpkgs; };
+    lib = import ./lib.nix { inherit nixpkgs; };
     nixosModules = {
       backups = import ./modules/backups.nix;
       caddyReverseProxy = import ./modules/caddy.nix;
