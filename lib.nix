@@ -31,8 +31,8 @@ let
     '';
 
     installPhase = ''
-      mkdir -p $out/node_modules
-      cp -R ./node_modules/* $out/node_modules
+      mkdir -p $out
+      cp -R ./node_modules $out
     '';
 
     outputHashAlgo = "sha256";
