@@ -19,6 +19,7 @@ let
   site = service: ''
     ${service.domain} {
       header -Server
+      encode zstd gzip
       ${reverseProxies service}
     }
   '';
