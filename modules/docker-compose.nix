@@ -61,7 +61,7 @@ in {
         serviceConfig = let
           startScript = pkgs.writeShellScript "backup" ''
             #!/bin/bash
-            ${lib.concatStringsSep " " (lib.map (imageName: "${pkgs.docker}/bin/docker image load -i ${imageName}") project.loadImages)}
+            ${lib.concatStringsSep "\n" (lib.map (imageName: "${pkgs.docker}/bin/docker image load -i ${imageName}") project.loadImages)}
             ${pkgs.docker-compose}/bin/docker-compose -f ${dockerComposeFile} up -d
           '';
         in {
