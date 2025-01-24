@@ -16,23 +16,24 @@ let
   ) f) { } systems;
 
   buildBunDependencies = (pkgs: {
-    name,
+    pname,
     version,
     src,
-    hash,
+    hash ? pkgs.lib.fakeSha256,
+    flags ? [],
   }: pkgs.stdenv.mkDerivation {
     inherit version src;
 
-    pname = "${name}_node-modules";
+    pname = "${pname}_node-modules";
     nativeBuildInputs = [ pkgs.bun ];
 
     buildPhase = ''
-      bun install --production --no-progress --frozen-lockfile --ignore-scripts
+      bun install --no-progress --frozen-lockfile --ignore-scripts ${builtins.concatStringsSep " " flags}
     '';
 
     installPhase = ''
       mkdir -p $out
-      cp -R ./node_modules $out
+      mv node_modules $out
     '';
 
     outputHashAlgo = "sha256";
@@ -40,21 +41,17 @@ let
     outputHash = hash;
   });
 
-  buildBunPackage = (pkgs: {
+  buildBunPackage = (pkgs: dependencies: {
     pname,
     version,
     src,
-    hash,
-  }:
-    let
-      nodeModules = buildBunDependencies pkgs { name = pname; inherit version src hash; };
-    in pkgs.stdenv.mkDerivation {
+  }: pkgs.stdenv.mkDerivation {
       inherit pname version src;
-      nativeBuildInputs = [ pkgs.bun nodeModules pkgs.makeBinaryWrapper ];
+      nativeBuildInputs = [ pkgs.bun dependencies pkgs.makeBinaryWrapper ];
 
       installPhase = ''
         mkdir -p $out/
-        ln -s ${nodeModules}/node_modules $out/
+        ln -s ${dependencies}/node_modules $out/
         cp -R ./src package.jso[n] tsconfig.jso[n] $out
         makeBinaryWrapper ${pkgs.bun}/bin/bun $out/bun --chdir $out
         makeBinaryWrapper ${pkgs.bun}/bin/bunx $out/bunx --chdir $out
@@ -78,6 +75,30 @@ let
     installPhase = ''
       mkdir -p $out
       cp *.${compileExtension} $out
+    '';
+  });
+
+  buildAstroWebsite = (pkgs: dependencies: {
+    pname,
+    version,
+    src,
+  }: pkgs.stdenv.mkDerivation {
+    inherit pname version src;
+    buildInputs = [ pkgs.bun dependencies ];
+
+    ASTRO_TELEMETRY_DISABLED = "true";
+
+    configurePhase = ''
+      ln -s ${dependencies}/node_modules .
+    '';
+
+    buildPhase = ''
+      bun ./node_modules/.bin/astro build
+    '';
+
+    installPhase = ''
+      mkdir -p $out
+      mv dist/* $out
     '';
   });
 
@@ -117,6 +138,7 @@ let
     inherit buildBunDependencies;
     inherit buildBunPackage;
     inherit buildSqliteExtensions;
+    inherit buildAstroWebsite;
     inherit buildStaticWebserver;
     inherit mkStaticWebserverShell;
     inherit mkStaticWebserverFlake;
