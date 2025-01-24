@@ -35,7 +35,10 @@ in {
     virtualisation.docker = {
       enable = true;
       enableOnBoot = true;
-      autoPrune.enable = true;
+      autoPrune = {
+        enable = true;
+        flags = [ "--all" ];
+      };
     };
 
     users.users = lib.mkMerge (lib.map (user: {
