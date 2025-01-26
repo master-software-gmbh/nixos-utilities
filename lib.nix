@@ -97,8 +97,7 @@ let
     '';
 
     installPhase = ''
-      mkdir -p $out
-      mv dist/* $out
+      mv dist $out
     '';
   });
 
@@ -133,8 +132,30 @@ let
 
   systemdServiceRef = name: "${name}.service";
 
+  biome = (pkgs: let
+    check = pkgs.writeShellScriptBin "biome-check" ''
+      ${pkgs.bun}/bin/bun pm ls -g 2>&1 | grep @biomejs/biome > /dev/null || ${pkgs.bun}/bin/bun add -g @biomejs/biome > /dev/null
+      ${pkgs.bun}/bin/bunx @biomejs/biome check --config-path=${./biome.json} --write ./
+    '';
+    localConfig = {
+      "$schema" = "https://biomejs.dev/schemas/1.8.2/schema.json";
+      extends = [./biome.json];
+    };
+    update = pkgs.writeShellScriptBin "biome-update" ''
+      if [ -f biome.json ]; then
+        jq '.extends = ["${./biome.json}"]' biome.json > tmp.json
+        mv tmp.json biome.json
+      else
+        echo '${builtins.toJSON localConfig}' > biome.json
+      fi
+    '';
+  in {
+    inherit check update;
+  });
+
   lib = {
     inherit allSystems;
+    inherit biome;
     inherit buildBunDependencies;
     inherit buildBunPackage;
     inherit buildSqliteExtensions;
