@@ -124,6 +124,8 @@ in {
     };
 
     nix = {
+      settings.trusted-users = [ "root" cfg.userName ];
+
       optimise = {
         automatic = true;
         dates = [ "03:00" ];
