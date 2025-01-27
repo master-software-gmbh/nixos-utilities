@@ -21,13 +21,15 @@ let
     src,
     hash ? pkgs.lib.fakeSha256,
     flags ? [],
+    key ? null,
   }: pkgs.stdenv.mkDerivation {
     inherit version src;
 
     pname = "${pname}_node-modules";
-    nativeBuildInputs = [ pkgs.bun ];
+    nativeBuildInputs = [ pkgs.bun pkgs.openssh pkgs.git ];
 
     buildPhase = ''
+      ${if key != null then "export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i ${key}'" else ""}
       bun install --no-progress --frozen-lockfile --ignore-scripts ${builtins.concatStringsSep " " flags}
     '';
 
@@ -54,6 +56,7 @@ let
         ln -s ${dependencies}/node_modules $out/
         cp -R ./src package.jso[n] tsconfig.jso[n] $out
         makeBinaryWrapper ${pkgs.bun}/bin/bun $out/bun --chdir $out
+        makeBinaryWrapper ${pkgs.bun}/bin/bun $out/run --chdir $out --add-flags "run --prefer-offline --no-install $out/src/main.ts"
         makeBinaryWrapper ${pkgs.bun}/bin/bunx $out/bunx --chdir $out
       '';
   });
