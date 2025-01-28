@@ -4,7 +4,28 @@
   };
 
   outputs = { self, nixpkgs }: {
-    lib = import ./lib.nix { inherit nixpkgs; };
+    lib = let
+      astro = import ./lib/astro.nix {};
+      biome = import ./lib/biome.nix {};
+      bun = import ./lib/bun.nix {};
+      filter = import ./lib/filter.nix;
+      sqlite = import ./lib/sqlite.nix {};
+      system = import ./lib/system.nix {};
+      systemd = import ./lib/systemd.nix {};
+      webserver = import ./lib/webserver.nix {};
+    in {
+      inherit biome filter;
+      allSystems = system.allSystems;
+      buildBunDependencies = bun.buildBunDependencies;
+      buildBunPackage = bun.buildBunPackage;
+      buildSqliteExtensions = sqlite.buildSqliteExtensions;
+      buildAstroWebsite = astro.buildAstroWebsite;
+      buildStaticWebserver = webserver.buildStaticWebserver;
+      mkStaticWebserverShell = webserver.mkStaticWebserverShell;
+      mkStaticWebserverFlake = webserver.mkStaticWebserverFlake;
+      systemdServiceRef = systemd.systemdServiceRef;
+    };
+
     nixosModules = {
       backups = import ./modules/backups.nix;
       caddyReverseProxy = import ./modules/caddy.nix;

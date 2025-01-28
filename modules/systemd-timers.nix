@@ -2,7 +2,7 @@
 
 let
   cfg = config.masterSoftware.systemdTimers;
-  systemdServiceRef = (import ../lib.nix { inherit pkgs; }).systemdServiceRef;
+  systemdServiceRef = (import ../lib/systemd.nix { inherit pkgs; }).systemdServiceRef;
 in {
   options = {
     masterSoftware.systemdTimers = with lib; {

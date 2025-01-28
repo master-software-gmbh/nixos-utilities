@@ -3,7 +3,7 @@
 let
   cfg = config.masterSoftware.dockerCompose;
   yaml = pkgs.formats.yaml { };
-  systemdServiceRef = (import ../lib.nix { inherit pkgs; }).systemdServiceRef;
+  systemdServiceRef = (import ../lib/systemd.nix { inherit pkgs; }).systemdServiceRef;
 in {
   imports = [
     ./backups.nix
