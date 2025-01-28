@@ -22,7 +22,14 @@ let
     hash ? pkgs.lib.fakeSha256,
     flags ? [],
     key ? null,
-  }: pkgs.stdenv.mkDerivation {
+  }: let
+    adjustPermissions = [
+      "ls -l ${key}"
+      "chown $(whoami):$(whoami) ${key}"
+      "chmod 600 ${key}"
+      "ls -l ${key}"
+    ];
+  in pkgs.stdenv.mkDerivation {
     inherit version src;
 
     pname = "${pname}_node-modules";
@@ -30,6 +37,7 @@ let
 
     buildPhase = ''
       ${if key != null then "export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i ${key}'" else ""}
+      ${if key != null then builtins.concatStringsSep "\n" adjustPermissions else ""}
       bun install --no-progress --frozen-lockfile --ignore-scripts ${builtins.concatStringsSep " " flags}
     '';
 
