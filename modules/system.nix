@@ -124,7 +124,7 @@ in {
     };
 
     nix = {
-      settings.trusted-users = [ "root" cfg.userName ];
+      settings.trusted-users = [ cfg.userName ];
 
       optimise = {
         automatic = true;
