@@ -1,0 +1,3 @@
+{ ... }: {
+  systemdServiceRef = name: "${name}.service";
+}
