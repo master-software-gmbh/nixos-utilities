@@ -39,17 +39,20 @@
     pname,
     version,
     src,
+    env ? {},
   }: pkgs.stdenv.mkDerivation {
       inherit pname version src;
-      nativeBuildInputs = [ pkgs.bun dependencies pkgs.makeBinaryWrapper ];
+      nativeBuildInputs = [ pkgs.bun dependencies pkgs.makeWrapper ];
 
-      installPhase = ''
-        mkdir -p $out/
+      installPhase = let
+        envFlags = builtins.concatStringsSep " " (pkgs.lib.mapAttrsToList (name: value: "--set ${name} ${value}") env);
+      in ''
+        mkdir -p $out
         ln -s ${dependencies}/node_modules $out/
-        cp -R ./src package.jso[n] tsconfig.jso[n] $out
-        makeBinaryWrapper ${pkgs.bun}/bin/bun $out/bun --chdir $out
-        makeBinaryWrapper ${pkgs.bun}/bin/bun $out/run --chdir $out --add-flags "run --prefer-offline --no-install $out/src/main.ts"
-        makeBinaryWrapper ${pkgs.bun}/bin/bunx $out/bunx --chdir $out
+        cp -R . $out
+        makeWrapper ${pkgs.bun}/bin/bun $out/bun --chdir $out ${envFlags}
+        makeWrapper ${pkgs.bun}/bin/bun $out/run --chdir $out ${envFlags} --add-flags "run --prefer-offline --no-install $out/src/main.ts"
+        makeWrapper ${pkgs.bun}/bin/bunx $out/bunx --chdir $out ${envFlags}
       '';
   });
 }
