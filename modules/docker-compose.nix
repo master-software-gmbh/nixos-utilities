@@ -27,6 +27,11 @@ in {
               type = lib.types.listOf lib.types.str;
               default = [];
             };
+            restartTriggers = lib.mkOption {
+              description = "List of items that should trigger a restart of the project";
+              type = lib.types.listOf lib.types.package;
+              default = [];
+            };
             content = lib.mkOption {
               description = "Docker Compose project configuration";
               type = yaml.type;
@@ -56,7 +61,7 @@ in {
           (systemdServiceRef config.masterSoftware.docker.setupService)
         ];
         wantedBy = [ "multi-user.target" ];
-        restartTriggers = [ dockerComposeFile ];
+        restartTriggers = [ dockerComposeFile ] ++ project.restartTriggers;
 
         serviceConfig = let
           startScript = pkgs.writeShellScript "backup" ''

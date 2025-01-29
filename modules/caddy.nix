@@ -43,6 +43,7 @@ in {
       enable = true;
       projects.reverse-proxy = {
         backup = true;
+        restartTriggers = [ caddyfile ];
         content = {
           name = "reverse-proxy";
           networks.reverse-proxy = lib.mkIf (dockerNetworkName != null) {
