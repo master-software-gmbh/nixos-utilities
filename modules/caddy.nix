@@ -16,10 +16,16 @@ let
   reverseProxies = service: builtins.concatStringsSep "\n" (map (backend: ''
     ${reverseProxy backend}
   '') service.backends);
+  redirect = service: if service.redirect != null then let
+    code = if service.redirect.permanent then "permanent" else "temporary";
+  in ''
+    redir ${service.redirect.destination}{uri} ${code} 
+  '' else "";
   site = service: ''
     ${service.domain} {
       header -Server
       encode zstd gzip
+      ${redirect service}
       ${reverseProxies service}
     }
   '';

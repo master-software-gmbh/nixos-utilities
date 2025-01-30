@@ -18,6 +18,7 @@
           };
           backends = mkOption {
             description = "Backends to proxy";
+            default = [];
             type = types.listOf (types.submodule {
               options = {
                 matcher = mkOption {
@@ -29,6 +30,23 @@
                 upstream = mkOption {
                   description = "Upstream for the backend";
                   type = types.str;
+                };
+              };
+            });
+          };
+          redirect = mkOption {
+            description = "Redirect to another domain";
+            default = null;
+            type = types.nullOr (types.submodule {
+              options = {
+                destination = mkOption {
+                  description = "Domain to redirect to";
+                  type = types.str;
+                };
+                permanent = mkOption {
+                  description = "Use a permanent redirect";
+                  type = types.bool;
+                  default = false;
                 };
               };
             });
