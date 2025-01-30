@@ -1,4 +1,4 @@
-{ ... }: {
+{ ... }: let
   buildStaticWebserver = (pkgs: pname: version: src: pkgs.stdenv.mkDerivation {
     inherit pname version src;
     buildInputs = [ pkgs.caddy pkgs.makeWrapper ];
@@ -22,7 +22,8 @@
       serve
     ];
   });
-
+in {
+  inherit buildStaticWebserver mkStaticWebserverShell;
   mkStaticWebserverFlake = (pkgs: pname: version: src: {
     devShells.default = mkStaticWebserverShell pkgs src;
     packages.default = buildStaticWebserver pkgs pname version src;
