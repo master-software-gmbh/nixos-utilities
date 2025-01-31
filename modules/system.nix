@@ -36,6 +36,11 @@ in {
       default = [ ];
     };
 
+    ipv4Address = mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+    };
+
     ipv6Address = mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
@@ -109,15 +114,16 @@ in {
       };
     };
 
-    systemd.network = mkIf (cfg.ipv6Address != null) {
+    systemd.network = {
       enable = true;
       networks."30-wan" = {
         matchConfig.Name = "enp1s0";
-        networkConfig.DHCP = "ipv4";
-        address = [
-          cfg.ipv6Address
-        ];
+        networkConfig.DHCP = if cfg.ipv4Address == null then "ipv4" else "no";
+        address = []
+          ++ lib.optional (cfg.ipv4Address != null) cfg.ipv4Address
+          ++ lib.optional (cfg.ipv6Address != null) cfg.ipv6Address;
         routes = [
+          { Gateway = "172.31.1.1"; GatewayOnLink = true; }
           { Gateway = "fe80::1"; }
         ];
       };
