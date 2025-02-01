@@ -3,9 +3,14 @@
 {
   options.masterSoftware.reverseProxy = with lib; {
     enable = mkEnableOption "Enable Reverse Proxy";
+    secretName = mkOption {
+      description = "Name of the Vault secret";
+      type = types.nullOr types.str;
+      default = null;
+    };
     networkName = mkOption {
       description = "Name of the Docker network. If the value is null, the host network will be used.";
-      type = lib.types.nullOr types.str;
+      type = types.nullOr types.str;
       default = "reverse-proxy";
     };
     services = mkOption {
@@ -50,6 +55,22 @@
                 };
               };
             });
+          };
+          basicAuth = mkOption {
+            description = "Basic authentication";
+            default = null;
+            type = types.nullOr (types.listOf (types.submodule {
+              options = {
+                username = mkOption {
+                  description = "Username";
+                  type = types.str;
+                };
+                password = mkOption {
+                  description = "Password hash";
+                  type = types.str;
+                };
+              };
+            }));
           };
         };
       });
