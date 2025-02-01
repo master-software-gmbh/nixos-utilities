@@ -31,10 +31,25 @@
                   type = types.str;
                   default = "*";
                 };
-
                 upstream = mkOption {
                   description = "Upstream for the backend";
                   type = types.str;
+                };
+                upHeaders = mkOption {
+                  description = "Upstream headers";
+                  type = types.listOf (types.submodule {
+                    options = {
+                      name = mkOption {
+                        description = "Header name";
+                        type = types.str;
+                      };
+                      value = mkOption {
+                        description = "Header value";
+                        type = types.str;
+                      };
+                    };
+                  });
+                  default = [];
                 };
               };
             });

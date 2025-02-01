@@ -9,9 +9,13 @@ let
       admin off
     }
   '';
+  upHeaders = headers: builtins.concatStringsSep "\n" (map (header: ''
+    header_up ${header.name} ${header.value}
+  '') headers);
   reverseProxy = backend: ''
     reverse_proxy ${backend.matcher} {
       to ${backend.upstream}
+      ${upHeaders backend.upHeaders}
     }
   '';
   reverseProxies = service: builtins.concatStringsSep "\n" (map (backend: ''
