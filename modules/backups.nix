@@ -4,7 +4,7 @@ let
   cfg = config.masterSoftware.backups;
   backupLocation = "/var/lib/backups";
   optionalS3Backup = if (cfg.s3Config != null) then ''
-    ${pkgs.s3cmd}/bin/s3cmd --config=${cfg.s3Config.configFile} put $backup_file s3://${cfg.s3Config.bucket}
+    ${pkgs.s3cmd}/bin/s3cmd --config=${cfg.s3Config.configFile} put $backup_file s3://${cfg.s3Config.bucket}/${config.networking.hostName}/
 
     if [ $? -ne 0 ]; then
       echo "Failed to create S3 backup."

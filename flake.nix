@@ -9,12 +9,14 @@
       biome = import ./lib/biome.nix {};
       bun = import ./lib/bun.nix {};
       filter = import ./lib/filter.nix;
+      s3cmd = import ./lib/s3cmd.nix {};
       sqlite = import ./lib/sqlite.nix {};
       system = import ./lib/system.nix {};
       systemd = import ./lib/systemd.nix {};
+      vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
       webserver = import ./lib/webserver.nix {};
     in {
-      inherit biome filter;
+      inherit biome filter s3cmd vault;
       allSystems = system.allSystems;
       buildBunDependencies = bun.buildBunDependencies;
       buildBunPackage = bun.buildBunPackage;
