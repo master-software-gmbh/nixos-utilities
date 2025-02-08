@@ -24,6 +24,20 @@ rec {
   # Default to filter when calling this lib.
   __functor = self: filter;
 
+  bun = {
+    root,
+    include ? [
+      "src"
+      "bun.lock"
+      "bun.lockb"
+      "package.json"
+      "tsconfig.json"
+    ]
+  }: filter {
+    root = root;
+    include = include;
+  };
+
   # A proper source filter
   filter =
     {
@@ -175,5 +189,4 @@ rec {
       builtins.pathExists p &&
       (builtins.readDir parent).${builtins.unsafeDiscardStringContext base} == "directory"
     );
-
 }
