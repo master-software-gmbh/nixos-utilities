@@ -23,6 +23,9 @@
         "noUnusedTemplateLiteral": {
           "level": "error",
           "fix": "safe"
+        },
+        "useNodejsImportProtocol": {
+          "level": "off"
         }
       },
       "suspicious": {
