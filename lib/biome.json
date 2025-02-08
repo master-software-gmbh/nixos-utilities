@@ -15,8 +15,9 @@
     "rules": {
       "recommended": true,
       "complexity": {
-        "noUselessSwitchCase": "off",
-        "noStaticOnlyClass": "off"
+        "noStaticOnlyClass": "off",
+        "noThisInStatic": "off",
+        "noUselessSwitchCase": "off"
       },
       "style": {
         "noParameterAssign": "warn",
