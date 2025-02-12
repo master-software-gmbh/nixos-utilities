@@ -16,10 +16,8 @@
       vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
       webserver = import ./lib/webserver.nix {};
     in {
-      inherit biome filter s3cmd vault;
+      inherit bun biome filter s3cmd vault;
       allSystems = system.allSystems;
-      buildBunDependencies = bun.buildBunDependencies;
-      buildBunPackage = bun.buildBunPackage;
       buildSqliteExtensions = sqlite.buildSqliteExtensions;
       buildAstroWebsite = astro.buildAstroWebsite;
       buildStaticWebserver = webserver.buildStaticWebserver;
