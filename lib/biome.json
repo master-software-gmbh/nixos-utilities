@@ -14,10 +14,14 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "noBlankTarget": "off"
+      },
       "complexity": {
         "noStaticOnlyClass": "off",
         "noThisInStatic": "off",
-        "noUselessSwitchCase": "off"
+        "noUselessSwitchCase": "off",
+        "useLiteralKeys": "off"
       },
       "style": {
         "noParameterAssign": "warn",
