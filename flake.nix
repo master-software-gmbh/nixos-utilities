@@ -5,6 +5,7 @@
 
   outputs = { self, nixpkgs }: {
     lib = let
+      actions = import ./lib/actions.nix {};
       adr = import ./lib/adr.nix {};
       astro = import ./lib/astro.nix {};
       biome = import ./lib/biome.nix {};
@@ -17,7 +18,7 @@
       vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
       webserver = import ./lib/webserver.nix {};
     in {
-      inherit adr bun biome filter s3cmd sqlite vault;
+      inherit actions adr bun biome filter s3cmd sqlite vault;
       allSystems = system.allSystems;
       buildAstroWebsite = astro.buildAstroWebsite;
       buildStaticWebserver = webserver.buildStaticWebserver;
