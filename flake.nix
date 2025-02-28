@@ -5,6 +5,7 @@
 
   outputs = { self, nixpkgs }: {
     lib = let
+      adr = import ./lib/adr.nix {};
       astro = import ./lib/astro.nix {};
       biome = import ./lib/biome.nix {};
       bun = import ./lib/bun.nix {};
@@ -16,9 +17,8 @@
       vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
       webserver = import ./lib/webserver.nix {};
     in {
-      inherit bun biome filter s3cmd vault;
+      inherit adr bun biome filter s3cmd sqlite vault;
       allSystems = system.allSystems;
-      buildSqliteExtensions = sqlite.buildSqliteExtensions;
       buildAstroWebsite = astro.buildAstroWebsite;
       buildStaticWebserver = webserver.buildStaticWebserver;
       mkStaticWebserverShell = webserver.mkStaticWebserverShell;

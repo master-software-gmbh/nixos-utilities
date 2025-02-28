@@ -16,6 +16,7 @@
     ${pkgs.bun}/bin/bun pm ls -g 2>&1 | grep @biomejs/biome > /dev/null || ${pkgs.bun}/bin/bun add -g @biomejs/biome > /dev/null
     ${pkgs.bun}/bin/bunx @biomejs/biome check --write ./
   '';
-in {
-  inherit check update;
-}
+in [
+  update
+  check
+]

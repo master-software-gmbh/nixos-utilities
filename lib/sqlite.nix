@@ -1,5 +1,6 @@
-{ ... }: {
-  buildSqliteExtensions = (pkgs: path: let
+{ ... }: rec {
+  commonExtensions = pkgs: (buildExtensions pkgs ./extensions);
+  buildExtensions = (pkgs: path: let
     compileExtension = if (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") then "dylib" else "so";
     compileFlag = if (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") then "-dynamiclib" else "-shared";
   in pkgs.stdenv.mkDerivation {
