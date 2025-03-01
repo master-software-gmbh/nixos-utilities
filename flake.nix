@@ -13,12 +13,13 @@
       filter = import ./lib/filter.nix;
       s3cmd = import ./lib/s3cmd.nix {};
       sqlite = import ./lib/sqlite.nix {};
+      structurizr = import ./lib/structurizr/default.nix {};
       system = import ./lib/system.nix {};
       systemd = import ./lib/systemd.nix {};
       vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
       webserver = import ./lib/webserver.nix {};
     in {
-      inherit actions adr bun biome filter s3cmd sqlite vault;
+      inherit actions adr bun biome filter s3cmd sqlite vault structurizr;
       allSystems = system.allSystems;
       buildAstroWebsite = astro.buildAstroWebsite;
       buildStaticWebserver = webserver.buildStaticWebserver;

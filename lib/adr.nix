@@ -1,6 +1,6 @@
 { ... }: pkgs: let
   init = pkgs.writeShellScriptBin "adr-init" ''
-    mkdir -p ./docs
+    mkdir -p ./docs/adrs
     echo "# 1. Record architecture decisions
 
 Date: $(date '+%Y-%m-%d')
@@ -19,10 +19,10 @@ I will use Architecture Decision Records, as described by Michael Nygard in this
 
 ## Consequences
 
-See Michael Nygard's article, linked above." > ./docs/0001-record-architecture-decisions.md
+See Michael Nygard's article, linked above." > ./docs/adrs/0001-record-architecture-decisions.md
   '';
   new = pkgs.writeShellScriptBin "adr-new" ''
-    mkdir -p ./docs
+    mkdir -p ./docs/adrs
     echo "# 
 
 Date: $(date '+%Y-%m-%d')
@@ -41,7 +41,7 @@ Accepted
 
 ## Consequences
 
-" > ./docs/new.md
+" > ./docs/adrs/new.md
   '';
 in [
   init
