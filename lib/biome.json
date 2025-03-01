@@ -47,6 +47,9 @@
   "organizeImports": {
     "enabled": true
   },
+  "files": {
+    "ignore": ["**/*.min.js"]
+  },
   "javascript": {
     "formatter": {
       "enabled": true,
