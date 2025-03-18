@@ -1,0 +1,19 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create semantic release
+        uses: master-software-gmbh/semantic-release-action@v1
