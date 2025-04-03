@@ -1,6 +1,6 @@
 { ... }: pkgs: let
   localConfig = {
-    "$schema" = "https://biomejs.dev/schemas/1.8.2/schema.json";
+    "$schema" = "https://biomejs.dev/schemas/1.9.4/schema.json";
     extends = [./biome.json];
   };
   update = pkgs.writeShellScriptBin "biome-update" ''
