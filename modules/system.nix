@@ -70,7 +70,7 @@ in {
       "${cfg.userName}" = {
         isNormalUser = true;
         extraGroups = [ "wheel" ];
-        packages = with pkgs; [ ];
+        packages = with pkgs; [ htop ];
         openssh.authorizedKeys.keys = cfg.sshAuthorizedKeys;
       };
     };
