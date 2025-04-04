@@ -56,27 +56,27 @@
       '';
   });
 
-  overlay1_2_2 = system: (final: prev: let
-    version = "1.2.2";
+  overlay1_2_8 = system: (final: prev: let
+    version = "1.2.8";
   in {
     bun = prev.bun.overrideAttrs (old: {
       inherit version;
       src = {
         "aarch64-darwin" = prev.fetchurl {
           url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-darwin-aarch64.zip";
-          hash = "sha256-xNWOBsXDOIW1JvTZGjjKnr25/D+0zVR/fTMCBVyY5Bw=";
+          hash = "sha256-ioBqQKA3Mp5PtVlFcmf2xOvoIEy7rNsD85s0m+1ao1U=";
         };
         "aarch64-linux" = prev.fetchurl {
           url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-linux-aarch64.zip";
-          hash = "sha256-0duqPpryRUn62Svb5Psh+lMwLNBIqPAE6FokCYTJPU0=";
+          hash = "sha256-Iwg/JW8qHRVcRW4S45xR4x3EG5fGNCDZkV9Du4ar6rE=";
         };
         "x86_64-darwin" = prev.fetchurl {
           url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-darwin-x64-baseline.zip";
-          hash = "sha256-Dztuh9hi1AFvjZXaF3vJE2yi6VDz1tPSJqNdcGH/8PE=";
+          hash = "sha256-vYcbm19aR540MrO4YFQgeSwNOKLot8/H03i0NP8c2og=";
         };
         "x86_64-linux" = prev.fetchurl {
           url = "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-linux-x64.zip";
-          hash = "sha256-P077iv0fhKwqmMBGYciYVh0dNVJ9Awy0Vx6Zt8hfUHk=";
+          hash = "sha256-QrSLNmdguYb+HWqLE8VwbSZzCDmoV3eQzS6PKHmenzE=";
         };
       }.${system};
 
