@@ -10,6 +10,7 @@
       astro = import ./lib/astro.nix {};
       biome = import ./lib/biome.nix {};
       bun = import ./lib/bun.nix {};
+      eric = import ./lib/eric.nix {};
       filter = import ./lib/filter.nix;
       s3cmd = import ./lib/s3cmd.nix {};
       sqlite = import ./lib/sqlite.nix {};
@@ -19,7 +20,7 @@
       vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
       webserver = import ./lib/webserver.nix {};
     in {
-      inherit actions adr bun biome filter s3cmd sqlite vault structurizr;
+      inherit actions adr bun biome eric filter s3cmd sqlite vault structurizr;
       allSystems = system.allSystems;
       buildAstroWebsite = astro.buildAstroWebsite;
       buildStaticWebserver = webserver.buildStaticWebserver;
