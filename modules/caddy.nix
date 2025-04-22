@@ -33,7 +33,7 @@ let
   redirect = service: if service.redirect != null then let
     code = if service.redirect.permanent then "permanent" else "temporary";
   in ''
-    redir ${service.redirect.destination}{uri} ${code} 
+    redir ${service.redirect.matcher} ${service.redirect.destination}{uri} ${code} 
   '' else "";
   site = service: ''
     ${service.domain} {
