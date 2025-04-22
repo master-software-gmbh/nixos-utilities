@@ -59,6 +59,11 @@
             default = null;
             type = types.nullOr (types.submodule {
               options = {
+                matcher = mkOption {
+                  description = "Matcher for the redirect";
+                  type = types.str;
+                  default = "*";
+                };
                 destination = mkOption {
                   description = "Domain to redirect to";
                   type = types.str;
