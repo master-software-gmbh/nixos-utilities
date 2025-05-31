@@ -1,6 +1,13 @@
 { ... }: {
-  buildEric41 = (pkgs: { plugins ? [] }: let
+  buildEric41 = (pkgs: { extraPlugins ? [], extraSchemas ? [] }: let
+    name = "eric";
     version = "41.6.2.0";
+    schemas = [
+      "ElsterBasisSchema"
+    ] ++ extraSchemas;
+    plugins = [
+      "libcommonData"
+    ] ++ extraPlugins;
     sources = {
       "aarch64-darwin" = pkgs.fetchurl {
         url = "https://download.elster.de/download/eric/eric_41/ERiC-${version}-Darwin-universal.jar";
@@ -11,19 +18,27 @@
         hash = "sha256-zHitG4Ktt+iCKk9GrC3C4MRSWhUxh89kW9bUeHzqNJs=";
       };
     };
-
+    ericSource = sources.${pkgs.stdenvNoCC.hostPlatform.system} or (throw "Unsupported system: ${pkgs.stdenvNoCC.hostPlatform.system}");
+    docsSource = pkgs.fetchurl {
+      url = "https://download.elster.de/download/eric/eric_41/ERiC-${version}-Dokumentation.zip";
+      hash = "sha256-AbsJWLoQmfD1uoPZIfFxcMmrGYW8XbvIfi7Sk8zrbms=";
+    };
   in pkgs.stdenvNoCC.mkDerivation {
-    name = "eric";
-    inherit version;
+    inherit name version;
 
     nativeBuildInputs = [
       pkgs.unzip
     ];
 
-    src = sources.${pkgs.stdenvNoCC.hostPlatform.system} or (throw "Unsupported system: ${pkgs.stdenvNoCC.hostPlatform.system}");
+    srcs = [
+      ericSource
+      docsSource
+    ];
 
     unpackPhase = ''
-      unzip $src
+      for src in $srcs; do
+        unzip $src
+      done
     '';
 
     installPhase = ''
@@ -33,10 +48,14 @@
       mv ERiC-${version}/*/lib/libericapi.{so,dylib} $out/
       mv ERiC-${version}/*/lib/libeSigner.{so,dylib} $out/
       mv ERiC-${version}/*/lib/libericxerces.{so,dylib} $out/
-      mv ERiC-${version}/*/lib/plugins2/libcommonData.{so,dylib} $out/plugins2/
 
       for plugin in ${builtins.concatStringsSep " " plugins}; do
         mv ERiC-${version}/*/lib/plugins2/$plugin.{so,dylib} $out/plugins2/
+      done
+
+      for schema in ${builtins.concatStringsSep " " schemas}; do
+        mkdir -p $out/Schnittstellenbeschreibungen/$schema/Schema
+        mv ERiC-${version}/Dokumentation/Schnittstellenbeschreibungen/$schema/Schema/*.xsd $out/Schnittstellenbeschreibungen/$schema/Schema/
       done
     '';
   });
