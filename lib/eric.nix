@@ -15,7 +15,7 @@
       };
       "x86_64-linux" = pkgs.fetchurl {
         url = "https://download.elster.de/download/eric/eric_41/ERiC-${version}-Linux-x86_64.jar";
-        hash = "sha256-zHitG4Ktt+iCKk9GrC3C4MRSWhUxh89kW9bUeHzqNJs=";
+        hash = "sha256-15y8NekqWFCEC4SuS7YW9uv/NmAzSR/m2CxVNDvPcvo=";
       };
     };
     ericSource = sources.${pkgs.stdenvNoCC.hostPlatform.system} or (throw "Unsupported system: ${pkgs.stdenvNoCC.hostPlatform.system}");
