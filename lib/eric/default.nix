@@ -1,4 +1,5 @@
 { ... }: {
+  testCertificate = (pkgs: pkgs.copyPathToStore ./test-softorg-pse.pfx);
   buildEric41 = (pkgs: { extraPlugins ? [], extraSchemas ? [] }: let
     name = "eric";
     version = "41.6.2.0";

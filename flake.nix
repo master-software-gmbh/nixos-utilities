@@ -10,7 +10,7 @@
       astro = import ./lib/astro.nix {};
       biome = import ./lib/biome.nix {};
       bun = import ./lib/bun.nix {};
-      eric = import ./lib/eric.nix {};
+      eric = import ./lib/eric/default.nix {};
       filter = import ./lib/filter.nix;
       s3cmd = import ./lib/s3cmd.nix {};
       sqlite = import ./lib/sqlite.nix {};
