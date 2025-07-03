@@ -88,6 +88,9 @@ in {
                 "80:80"
                 "443:443"
               ];
+              extra_hosts = [
+                "host.docker.internal:host-gateway"
+              ];
               network_mode = lib.mkIf (dockerNetworkName == null) "host";
               networks = lib.mkIf (dockerNetworkName != null) [ dockerNetworkName ];
               volumes = [
