@@ -16,6 +16,7 @@
       "recommended": true,
       "a11y": {
         "noBlankTarget": "off",
+        "noSvgWithoutTitle": "off",
         "noLabelWithoutControl": "off"
       },
       "complexity": {

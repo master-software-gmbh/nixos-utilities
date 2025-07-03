@@ -22,7 +22,7 @@ in {
     nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkg.pname) [ "vault" ];
 
     environment = {
-      systemPackages = [ pkgs.vault ];
+      systemPackages = [ pkgs.vault-bin ];
     };
 
     systemd.services."${cfg.serviceName}" = {
@@ -32,7 +32,7 @@ in {
       path = [ pkgs.getent ];
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.vault}/bin/vault agent -config=${configFile}";
+        ExecStart = "${pkgs.vault-bin}/bin/vault agent -config=${configFile}";
       };
     };
   };
