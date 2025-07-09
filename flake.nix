@@ -5,39 +5,35 @@
 
   outputs = { self, nixpkgs }: {
     lib = let
-      actions = import ./lib/actions.nix {};
-      adr = import ./lib/adr.nix {};
-      astro = import ./lib/astro.nix {};
-      biome = import ./lib/biome.nix {};
-      bun = import ./lib/bun.nix {};
-      eric = import ./lib/eric/default.nix {};
-      filter = import ./lib/filter.nix;
-      s3cmd = import ./lib/s3cmd.nix {};
-      sqlite = import ./lib/sqlite.nix {};
-      structurizr = import ./lib/structurizr/default.nix {};
       system = import ./lib/system.nix {};
       systemd = import ./lib/systemd.nix {};
-      vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
-      webserver = import ./lib/webserver.nix {};
     in {
-      inherit actions adr bun biome eric filter s3cmd sqlite vault structurizr;
+      adr = import ./lib/adr.nix {};
+      bun = import ./lib/bun.nix {};
       allSystems = system.allSystems;
-      buildAstroWebsite = astro.buildAstroWebsite;
-      buildStaticWebserver = webserver.buildStaticWebserver;
-      mkStaticWebserverShell = webserver.mkStaticWebserverShell;
-      mkStaticWebserverFlake = webserver.mkStaticWebserverFlake;
+      filter = import ./lib/filter.nix;
+      astro = import ./lib/astro.nix {};
+      biome = import ./lib/biome.nix {};
+      s3cmd = import ./lib/s3cmd.nix {};
+      sqlite = import ./lib/sqlite.nix {};
+      actions = import ./lib/actions.nix {};
+      eric = import ./lib/eric/default.nix {};
+      opentofu = import ./lib/opentofu.nix {};
+      webserver = import ./lib/webserver.nix {};
       systemdServiceRef = systemd.systemdServiceRef;
+      vault = import ./lib/vault.nix { lib = nixpkgs.lib; };
+      structurizr = import ./lib/structurizr/default.nix {};
     };
 
     nixosModules = {
-      backups = import ./modules/backups.nix;
-      caddyReverseProxy = import ./modules/caddy.nix;
-      docker = import ./modules/docker.nix;
-      dockerCompose = import ./modules/docker-compose.nix;
-      reverseProxy = import ./modules/reverse-proxy.nix;
       system = import ./modules/system.nix;
-      systemdTimers = import ./modules/systemd-timers.nix;
+      docker = import ./modules/docker.nix;
+      backups = import ./modules/backups.nix;
       vaultAgent = import ./modules/vault-agent.nix;
+      caddyReverseProxy = import ./modules/caddy.nix;
+      reverseProxy = import ./modules/reverse-proxy.nix;
+      dockerCompose = import ./modules/docker-compose.nix;
+      systemdTimers = import ./modules/systemd-timers.nix;
     };
   };
 }
