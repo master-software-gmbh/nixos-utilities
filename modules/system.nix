@@ -31,6 +31,11 @@ in {
       default = "nixos";
     };
 
+    userPackages = mkOption {
+      type = types.listOf types.package;
+      default = [];
+    };
+
     allowedTCPPorts = mkOption {
       type = types.listOf types.int;
       default = [ ];
@@ -70,7 +75,7 @@ in {
       "${cfg.userName}" = {
         isNormalUser = true;
         extraGroups = [ "wheel" ];
-        packages = with pkgs; [ htop ];
+        packages = [ pkgs.htop ] ++ cfg.userPackages;
         openssh.authorizedKeys.keys = cfg.sshAuthorizedKeys;
       };
     };
