@@ -19,7 +19,7 @@ in {
   config = let
     configFile = pkgs.writeText "agent-config.json" (builtins.toJSON cfg.agentConfig);
   in lib.mkIf cfg.enable {
-    nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkg.pname) [ "vault" ];
+    nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkg.pname) [ "vault-bin" ];
 
     environment = {
       systemPackages = [ pkgs.vault-bin ];
