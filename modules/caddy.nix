@@ -19,6 +19,7 @@ let
     }
   '' else if backend.root != null then ''
     root ${backend.matcher} ${backend.root}
+    file_server
   '' else "";
   reverseProxies = service: builtins.concatStringsSep "\n" (map (backend: ''
     ${reverseProxy backend}
