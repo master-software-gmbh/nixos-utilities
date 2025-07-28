@@ -27,16 +27,20 @@
             type = types.listOf (types.submodule {
               options = {
                 matcher = mkOption {
-                  description = "Matcher for the backend";
+                  description = "Matcher of the backend";
                   type = types.str;
                   default = "*";
                 };
                 upstream = mkOption {
-                  description = "Upstream for the backend";
-                  type = types.str;
+                  description = "Upstream of the backend";
+                  type = types.nullOr types.str;
                 };
-                upHeaders = mkOption {
-                  description = "Upstream headers";
+                root = mkOption {
+                  description = "Root of the backend";
+                  type = types.nullOr types.str;
+                };
+                headers = mkOption {
+                  description = "Response headers";
                   type = types.listOf (types.submodule {
                     options = {
                       name = mkOption {

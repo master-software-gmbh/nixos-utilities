@@ -9,15 +9,17 @@ let
       admin off
     }
   '';
-  upHeaders = headers: builtins.concatStringsSep "\n" (map (header: ''
+  headers = headers: builtins.concatStringsSep "\n" (map (header: ''
     header_up ${header.name} ${header.value}
   '') headers);
-  reverseProxy = backend: ''
+  reverseProxy = backend: if backend.upstream != null then ''
     reverse_proxy ${backend.matcher} {
       to ${backend.upstream}
-      ${upHeaders backend.upHeaders}
+      ${headers backend.headers}
     }
-  '';
+  '' else if backend.root != null then ''
+    root ${backend.matcher} ${backend.root}
+  '' else "";
   reverseProxies = service: builtins.concatStringsSep "\n" (map (backend: ''
     ${reverseProxy backend}
   '') service.backends);

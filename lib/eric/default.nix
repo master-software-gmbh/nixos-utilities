@@ -1,7 +1,7 @@
 { ... }: {
   testCertificate = (pkgs: pkgs.copyPathToStore ./test-softorg-pse.pfx);
   buildEric41 = (pkgs: { extraPlugins ? [], extraSchemas ? [] }: let
-    name = "eric";
+    pname = "eric";
     version = "41.6.2.0";
     schemas = [
       "ElsterBasisSchema"
@@ -25,7 +25,7 @@
       hash = "sha256-AbsJWLoQmfD1uoPZIfFxcMmrGYW8XbvIfi7Sk8zrbms=";
     };
   in pkgs.stdenvNoCC.mkDerivation {
-    inherit name version;
+    inherit pname version;
 
     nativeBuildInputs = [
       pkgs.unzip
