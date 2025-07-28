@@ -34,10 +34,12 @@
                 upstream = mkOption {
                   description = "Upstream of the backend";
                   type = types.nullOr types.str;
+                  default = null;
                 };
                 root = mkOption {
                   description = "Root of the backend";
                   type = types.nullOr types.str;
+                  default = null;
                 };
                 headers = mkOption {
                   description = "Response headers";
