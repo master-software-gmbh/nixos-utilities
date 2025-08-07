@@ -41,6 +41,22 @@
                   type = types.nullOr types.str;
                   default = null;
                 };
+                upHeaders = mkOption {
+                  description = "Upstream headers";
+                  type = types.listOf (types.submodule {
+                    options = {
+                      name = mkOption {
+                        description = "Header name";
+                        type = types.str;
+                      };
+                      value = mkOption {
+                        description = "Header value";
+                        type = types.str;
+                      };
+                    };
+                  });
+                  default = [];
+                };
                 headers = mkOption {
                   description = "Response headers";
                   type = types.listOf (types.submodule {

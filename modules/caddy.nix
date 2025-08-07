@@ -9,17 +9,21 @@ let
       admin off
     }
   '';
-  headers = headers: builtins.concatStringsSep "\n" (map (header: ''
+  upHeaders = upHeaders: builtins.concatStringsSep "\n" (map (header: ''
     header_up ${header.name} ${header.value}
+  '') upHeaders);
+  headers = headers: builtins.concatStringsSep "\n" (map (header: ''
+    header ${header.name} ${header.value}
   '') headers);
   reverseProxy = backend: if backend.upstream != null then ''
     reverse_proxy ${backend.matcher} {
       to ${backend.upstream}
-      ${headers backend.headers}
+      ${upHeaders backend.upHeaders}
     }
   '' else if backend.root != null then ''
     root ${backend.matcher} ${backend.root}
     file_server
+    ${upHeaders backend.headers}
   '' else "";
   reverseProxies = service: builtins.concatStringsSep "\n" (map (backend: ''
     ${reverseProxy backend}
