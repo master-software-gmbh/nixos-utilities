@@ -20,7 +20,7 @@ let
     root ${backend.matcher} ${backend.root}
     file_server
     ${builtins.concatStringsSep "\n" (map (header: ''
-      header ${header.name} ${header.value}
+      header ${header.name} "${header.value}"
     '') backend.headers)}
   '' else "";
   reverseProxies = service: builtins.concatStringsSep "\n" (map (backend: ''
