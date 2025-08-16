@@ -15,6 +15,7 @@ let
       ${builtins.concatStringsSep "\n" (map (header: ''
         header_up ${header.name} ${header.value}
       '') backend.upHeaders)}
+      ${if backend.retryDuration != null then "lb_try_duration ${backend.retryDuration}s" else ""}
     }
   '' else if backend.root != null then ''
     root ${backend.matcher} ${backend.root}

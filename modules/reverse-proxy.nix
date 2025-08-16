@@ -73,6 +73,11 @@
                   });
                   default = [];
                 };
+                retryDuration = mkOption {
+                  description = "Retry duration in seconds";
+                  type = types.nullOr types.int;
+                  default = null;
+                };
               };
             });
           };
