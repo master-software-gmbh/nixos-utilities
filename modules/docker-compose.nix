@@ -57,7 +57,6 @@ in {
         after = [
           "network.target"
           "docker.service"
-          (systemdServiceRef config.masterSoftware.vaultAgent.serviceName)
           (systemdServiceRef config.masterSoftware.docker.setupService)
         ];
         wantedBy = [ "multi-user.target" ];

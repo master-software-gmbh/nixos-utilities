@@ -29,7 +29,6 @@
       system = import ./modules/system.nix;
       docker = import ./modules/docker.nix;
       backups = import ./modules/backups.nix;
-      vaultAgent = import ./modules/vault-agent.nix;
       caddyReverseProxy = import ./modules/caddy.nix;
       reverseProxy = import ./modules/reverse-proxy.nix;
       dockerCompose = import ./modules/docker-compose.nix;

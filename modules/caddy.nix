@@ -2,7 +2,6 @@
 
 let
   cfg = config.masterSoftware.reverseProxy;
-  useSecret = cfg.secretName != null;
   dockerNetworkName = cfg.networkName;
   globalOptions = ''
     {
@@ -53,19 +52,11 @@ let
   sites = builtins.concatStringsSep "\n" (map (service: ''
     ${site service}
   '') cfg.services);
-  secretStart = if useSecret then ''
-    {{- with secret "${cfg.secretName}" -}}
-  '' else "";
-  secretEnd = if useSecret then ''
-    {{- end -}}
-  '' else "";
   caddyfile = pkgs.writeTextFile {
-    name = if useSecret then "Caddyfile.ctmpl" else "Caddyfile";
+    name = "Caddyfile";
     text = ''
-      ${secretStart}
       ${globalOptions}
       ${sites}
-      ${secretEnd}
     '';
   };
 in {
@@ -108,24 +99,12 @@ in {
           };
         };
       };
-      vaultAgent = lib.mkIf useSecret {
-        agentConfig = {
-          template = [
-            {
-              source = caddyfile;
-              destination = "/var/lib/reverse-proxy/Caddyfile";
-              create_dest_dirs = true;
-            }
-          ];
-        };
-      };
     };
 
     systemd.tmpfiles.rules = [
       "d /var/lib/reverse-proxy/data 0755 root root - -"
       "d /var/lib/reverse-proxy/config 0755 root root - -"
-    ] ++ (if useSecret then [] else [
       "L+ /var/lib/reverse-proxy/Caddyfile 0755 root root - ${caddyfile}"
-    ]);
+    ];
   };
 }
